@@ -8,6 +8,7 @@ from routes.alert_routes import alert_bp
 from routes.report_routes import report_bp
 from routes.users_routes import users_bp
 from database.connection import Base, engine
+from database import models
 from services.alert_service import AlertService
 from routes.report_routes import init_report_scheduler
 import os
