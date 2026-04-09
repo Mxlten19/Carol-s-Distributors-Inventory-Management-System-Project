@@ -36,23 +36,30 @@ def generate_report():
     """Generate a new inventory report (on-demand)"""
     try:
         data = request.get_json() or {}
-        
-        # Use provided date or current date
-        if "date" in data:
-            report_date = datetime.strptime(data["date"], "%Y-%m-%d")
-        else:
-            report_date = datetime.now()
-        
-        # Generate PDF
+
+        if "date" not in data or not str(data.get("date","")).strip():
+            return jsonify({"success": False, "error": "Please select a date before generating a report."}), 400
+
+        try:
+            report_date = datetime.strptime(str(data["date"]).strip(), "%Y-%m-%d")
+        except ValueError:
+            return jsonify({"success": False, "error": "The date format is invalid. Please use the date picker."}), 400
+
+        if report_date.date() > datetime.now().date():
+            return jsonify({"success": False, "error": "You cannot generate a report for a future date."}), 400
+
+        if report_date.year < 2000:
+            return jsonify({"success": False, "error": "Please choose a date after 1 January 2000."}), 400
+
         result = ReportService.generate_inventory_pdf(report_date)
-        
+
         return jsonify({
             "success": True,
             "message": "Report generated successfully",
             "report": {
                 "filename": result["filename"],
                 "date": result["date"],
-                "report_date": result["date"],  # Same as date for frontend
+                "report_date": result["date"],
                 "total_items": result["summary"]["total_items"],
                 "total_products": result["summary"]["total_products"],
                 "total_value": result["summary"]["total_value"],
@@ -62,9 +69,6 @@ def generate_report():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-# ============================================
-# 3. DOWNLOAD/VIEW REPORT FILE
-# ============================================
 @report_bp.get("/download/<filename>")
 def download_report(filename):
     try:
