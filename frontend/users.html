@@ -11,7 +11,10 @@
 <div id="topbar"></div>
 
 <div class="content">
-    <h2>User Management</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="margin:0;">User Management</h2>
+        <button class="btn" onclick="openAddModal()">+ Add User</button>
+    </div>
 
     <table class="table">
         <thead>
@@ -19,12 +22,45 @@
                 <th>Username</th>
                 <th>Role</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="users-table">
-        </tbody>
+        <tbody id="users-table"></tbody>
     </table>
+</div>
+
+<!-- ADD / EDIT MODAL -->
+<div id="user-modal" class="modal hidden">
+    <div class="modal-content">
+        <h3 id="modal-title">Add User</h3>
+        <input type="hidden" id="modal-user-id"/>
+
+        <div style="margin-bottom:12px;">
+            <label style="display:block;margin-bottom:4px;font-weight:500;">Username</label>
+            <input id="modal-username" type="text" placeholder="Enter username"
+                style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;"/>
+        </div>
+
+        <div id="modal-password-row" style="margin-bottom:12px;">
+            <label style="display:block;margin-bottom:4px;font-weight:500;">
+                Password <span style="color:#888;font-weight:400;font-size:12px;">(leave blank to keep current)</span>
+            </label>
+            <input id="modal-password" type="password" placeholder="Enter password"
+                style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;"/>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <label style="display:block;margin-bottom:4px;font-weight:500;">Role</label>
+            <select id="modal-role"
+                style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;box-sizing:border-box;">
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn" style="background:#6c757d;" onclick="closeModal()">Cancel</button>
+            <button class="btn" onclick="saveUser()">Save</button>
+        </div>
+    </div>
 </div>
 
 <script src="js/api.js"></script>
@@ -33,4 +69,3 @@
 
 </body>
 </html>
-
