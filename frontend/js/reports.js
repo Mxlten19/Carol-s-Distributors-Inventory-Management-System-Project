@@ -109,38 +109,75 @@ function downloadReport(filename) {
 }
 
 async function generateReport() {
+    const dateInput = document.getElementById("report-date");
+    const errorMsg  = document.getElementById("report-date-error");
+    const reportDate = dateInput ? dateInput.value.trim() : "";
+
+    // ── clear any previous error ──
+    errorMsg.textContent = "";
+    errorMsg.style.display = "none";
+    dateInput.style.border = "1px solid #ccc";
+
+    // ── validation ──
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (!reportDate) {
+        showDateError("Please select a date before generating a report.");
+        return;
+    }
+
+    const chosen = new Date(reportDate);
+    if (isNaN(chosen.getTime())) {
+        showDateError("The date you entered is not valid. Please use the date picker.");
+        return;
+    }
+
+    if (chosen > today) {
+        showDateError("You cannot generate a report for a future date.");
+        return;
+    }
+
+    const minDate = new Date("2000-01-01");
+    if (chosen < minDate) {
+        showDateError("Please choose a date after 1 January 2000.");
+        return;
+    }
+
+    // ── all good — send request ──
     try {
-        const dateInput = document.getElementById("report-date");
-        const reportDate = dateInput ? dateInput.value : new Date().toISOString().split("T")[0];
-        
-        console.log("Generating report for date:", reportDate);
-        
         const response = await fetch('/reports/generate', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ date: reportDate })
         });
-        
+
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            showDateError(`Server error (${response.status}). Please try again.`);
+            return;
         }
-        
+
         const result = await response.json();
-        console.log("Generate response:", result);
-        
+
         if (result.success) {
             alert(`Report generated successfully!\nFilename: ${result.report.filename}`);
             closeReportModal();
-            loadReports(); // Reload the reports list
+            loadReports();
         } else {
-            alert("Error: " + result.error);
+            showDateError("Error: " + result.error);
         }
     } catch (error) {
-        console.error("Generate report error:", error);
-        alert("Network error: " + error.message);
+        showDateError("Network error: " + error.message);
     }
+}
+
+function showDateError(message) {
+    const errorMsg  = document.getElementById("report-date-error");
+    const dateInput = document.getElementById("report-date");
+    errorMsg.textContent = message;
+    errorMsg.style.display = "block";
+    dateInput.style.border = "1px solid #dc3545";
+    dateInput.focus();
 }
 
 function generateMonthlyReport() {
